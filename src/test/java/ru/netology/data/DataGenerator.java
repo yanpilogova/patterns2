@@ -14,7 +14,30 @@ import java.util.Locale;
 import static io.restassured.RestAssured.given;
 
 public class DataGenerator {
-    public static Faker faker = new Faker(new Locale("en"));
+
+    @Data
+    @RequiredArgsConstructor
+    public static class RegistrationData {
+        private final String login;
+        private final String password;
+        private final String status;
+
+    }
+    public static class Registration {
+
+        public static RegistrationData getUser(String status) {
+            return new RegistrationData(getRandomLogin(), getRandomPassword(), status);
+        }
+
+        public static String getRandomLogin() {
+            Faker faker = new Faker();
+            return faker.name().username();
+        }
+
+        public static String getRandomPassword() {
+            Faker faker = new Faker();
+            return faker.internet().password();
+        }
 
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
             .setBaseUri("http://localhost")
@@ -25,34 +48,17 @@ public class DataGenerator {
             .build();
 
 
-    private DataGenerator() {
-    }
-
     private static void sendRequest(RegistrationData user) {
+        Gson gson =new Gson();
+        String userBody = gson.toJson(user);
         given()
                 .spec(requestSpec)
-                .body(new Gson().toJson(user))
+                .body(userBody)
                 .when()
                 .post("/api/system/users")
                 .then()
                 .statusCode(200);
     }
-
-    public static String getRandomLogin() {
-        Faker faker = new Faker();
-        return faker.name().username();
-    }
-
-    public static String getRandomPassword() {
-        Faker faker = new Faker();
-        return faker.internet().password();
-    }
-
-    public static class Registration {
-
-        public static RegistrationData getUser(String status) {
-            return new RegistrationData(getRandomLogin(), getRandomPassword(), status);
-        }
 
         public static RegistrationData getRegisteredUser(String status) {
             var registeredUser = getUser(status);
@@ -61,14 +67,5 @@ public class DataGenerator {
         }
     }
 
-    @Data
-    @RequiredArgsConstructor
-    public static class RegistrationData {
-        String login;
-        String password;
-        String status;
 
-        public RegistrationData(String randomLogin, String randomPassword, String status) {
-        }
-    }
 }

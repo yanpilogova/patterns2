@@ -8,8 +8,9 @@ import org.junit.jupiter.api.Test;
 import static com.codeborne.selenide.Selectors.withText;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.open;
-import static ru.netology.data.DataGenerator.Registration.*;
-
+import static ru.netology.data.DataGenerator.*;
+import static ru.netology.data.DataGenerator.Registration.getRegisteredUser;
+import static ru.netology.data.DataGenerator.Registration.getUser;
 
 public class AuthTest {
 
@@ -35,7 +36,17 @@ public class AuthTest {
         $("[data-test-id=login] .input__control").setValue(notRegisteredUser.getLogin());
         $("[data-test-id=password] .input__control").setValue(notRegisteredUser.getPassword());
         $(".button").click();
-        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Неверно указан логин или пароль"));
+    }
+
+    @Test
+    @DisplayName("Should get error message if login with blocked registered user")
+    void shouldGetErrorIfBlockedUser() {
+        var blockedUser = getRegisteredUser("blocked");
+        $("[data-test-id=login] .input__control").setValue(blockedUser.getLogin());
+        $("[data-test-id=password] .input__control").setValue(blockedUser.getPassword());
+        $(".button").click();
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Пользователь заблокирован"));
     }
 
     @Test
@@ -46,7 +57,7 @@ public class AuthTest {
         $("[data-test-id=login] .input__control").setValue(wrongLogin);
         $("[data-test-id=password] .input__control").setValue(registeredUser.getPassword());
         $(".button").click();
-        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Неверно указан логин или пароль"));
     }
 
     @Test
@@ -57,6 +68,6 @@ public class AuthTest {
         $("[data-test-id=login] .input__control").setValue(registeredUser.getLogin());
         $("[data-test-id=password] .input__control").setValue(wrongPassword);
         $(".button").click();
-        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Ошибка! Неверно указан логин или пароль"));
+        $("[data-test-id=error-notification] .notification__content").shouldHave(Condition.text("Неверно указан логин или пароль"));
     }
 }
